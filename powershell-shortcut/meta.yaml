@@ -1,0 +1,24 @@
+{% set version = "1.0" %}
+{% set build = 0 %}
+
+package:
+  name: powershell-shortcut
+  version: {{ version }}
+
+build:
+  number: {{ build }}
+  skip: True  # [not win]
+
+requirements:
+  run:
+    - menuinst >=1.4.18
+test:
+  commands:
+    - if not exist %PREFIX%\\Menu\\powershell-shortcut.json exit 1
+    - if not exist %PREFIX%\\Menu\\powershell-shortcut.ico exit 1
+
+about:
+  home: https://github.com/TuftsRT/conda-packages
+  summary: Windows PowerShell shortcut with base environment activated
+  license: BSD-3-Clause
+  license_file: LICENSE
