@@ -1,0 +1,13 @@
+
+{
+    "menu_name": "${DISTRIBUTION_NAME}",
+    "menu_items":
+    [
+        {
+            "name": "Glue",
+            "pywscript": "${PYTHON_SCRIPTS}/glue-script.py",
+            "workdir": "${USERPROFILE}",
+            "icon": "${MENU_DIR}/glue.ico"
+        }
+    ]
+}
