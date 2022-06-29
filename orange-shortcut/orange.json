@@ -1,0 +1,13 @@
+
+{
+    "menu_name": "${DISTRIBUTION_NAME}",
+    "menu_items":
+    [
+        {
+            "name": "Orange",
+            "pywscript": "${PYTHON_SCRIPTS}/orange-canvas-script.py",
+            "workdir": "${USERPROFILE}",
+            "icon": "${MENU_DIR}/orange.ico"
+        }
+    ]
+}
