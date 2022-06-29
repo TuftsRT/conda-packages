@@ -1,0 +1,13 @@
+
+{
+    "menu_name": "${DISTRIBUTION_NAME}",
+    "menu_items":
+    [
+        {
+            "name": "IDLE",
+            "pywscript": "${PYTHON_SCRIPTS}/idle-script.py",
+            "workdir": "${USERPROFILE}",
+            "icon": "${MENU_DIR}/idle.ico"
+        }
+    ]
+}

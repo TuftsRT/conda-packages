@@ -1,0 +1,26 @@
+{% set version = "1.0" %}
+{% set build = 0 %}
+
+package:
+  name: idle-shortcut
+  version: {{ version }}
+
+build:
+  number: {{ build }}
+  skip: True  # [not win]
+
+requirements:
+  run:
+    - menuinst >=1.4.18
+    - python
+
+test:
+  commands:
+    - if not exist %PREFIX%\\Menu\\idle.json exit 1
+    - if not exist %PREFIX%\\Menu\\idle.ico exit 1
+
+about:
+  home: https://github.com/TuftsRT/conda-packages
+  summary: Start Menu shortcut for Python IDLE
+  license: BSD-3-Clause
+  license_file: LICENSE
