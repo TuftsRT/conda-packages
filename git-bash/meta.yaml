@@ -1,0 +1,33 @@
+{% set version = "2.37.0" %}
+{% set build = 0 %}
+
+package:
+  name: git-bash
+  version: {{ version }}
+
+source:
+  - url: https://github.com/git-for-windows/git/releases/download/v{{ version }}.windows.1/PortableGit-{{ version }}-64-bit.7z.exe  # [win64]
+    folder: .  # [win64]
+    sha256: 96808564283669e0129310c14f8ad6ffb55498d3381420bd22200a62585ab2f4  # [win64]
+
+build:
+  number: {{ build }}
+  skip: True  # [not win]
+  detect_binary_files_with_prefix: true
+
+requirements:
+  build:
+    - 7za
+
+test:
+  commands:
+    - if not exist %LIBRARY_PREFIX%\\bin\\git.exe exit 1
+    - if not exist %PREFIX%\\Menu\\git-bash.json exit 1
+    - if not exist %PREFIX%\\Menu\\git-bash.ico exit 1
+    - git --version
+    - git clone https://github.com/TuftsRT/conda-packages
+
+about:
+  home: https://github.com/TuftsRT/conda-packages
+  summary: Conda-enabled Git Bash prompt with Start Menu shortcut
+  license: GPL-2.0-only

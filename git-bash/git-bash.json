@@ -1,0 +1,13 @@
+{
+    "menu_name": "${DISTRIBUTION_NAME}",
+    "menu_items":
+    [
+        {
+            "name": "${DISTRIBUTION_NAME} Bash",
+            "script": "${PREFIX}/Library/bin/bash.exe",
+            "scriptarguments": ["--login", "-i", "--"],
+            "workdir": "${PERSONALDIR}",
+            "icon": "${MENU_DIR}/git-bash.ico"
+        }
+    ]
+}
