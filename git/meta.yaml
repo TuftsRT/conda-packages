@@ -1,4 +1,4 @@
-{% set version = "2.37.1" %}
+{% set version = "2.41.0" %}
 {% set build = 0 %}
 
 package:
@@ -8,7 +8,7 @@ package:
 source:
   - url: https://github.com/git-for-windows/git/releases/download/v{{ version }}.windows.1/PortableGit-{{ version }}-64-bit.7z.exe  # [win64]
     folder: .  # [win64]
-    sha256: b0bc403bb03326b835e239b3bf7c0af277f43eba5421132dc8531204c78b6b25  # [win64]
+    sha256: fcbaeffd24fdf435a1f7844825253509136377915e6720aa66aa256ec1f83c30  # [win64]
 
 build:
   number: {{ build }}
