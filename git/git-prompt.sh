@@ -35,8 +35,7 @@ else
 	PS1="$PS1"'$ '                 # prompt: always $
 
 	BASE="${CONDA_PREFIX%%\\envs*}"
-	BASE="${BASE//\\//}"
-	BASE="${BASE/C://c}"
+	BASE="$(cygpath $BASE)"
 	eval "$($BASE/scripts/conda.exe shell.bash hook)"
 fi
 
