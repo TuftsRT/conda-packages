@@ -1,0 +1,13 @@
+
+{
+    "menu_name": "${DISTRIBUTION_NAME}",
+    "menu_items":
+    [
+        {
+            "name": "DeepLabCut",
+            "pywscript": "-m deeplabcut",
+            "workdir": "${USERPROFILE}",
+            "icon": "${MENU_DIR}/deeplabcut.ico"
+        }
+    ]
+}
