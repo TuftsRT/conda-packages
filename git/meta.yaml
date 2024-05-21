@@ -1,4 +1,4 @@
-{% set version = "2.41.0" %}
+{% set version = "2.45.1" %}
 {% set build = 0 %}
 
 package:
@@ -8,7 +8,7 @@ package:
 source:
   - url: https://github.com/git-for-windows/git/releases/download/v{{ version }}.windows.1/PortableGit-{{ version }}-64-bit.7z.exe  # [win64]
     folder: .  # [win64]
-    sha256: fcbaeffd24fdf435a1f7844825253509136377915e6720aa66aa256ec1f83c30  # [win64]
+    sha256: f4be1f923e9cc1ee0cb09e99f0e90cf254b530bb622d12064361563307e2f505  # [win64]
 
 build:
   number: {{ build }}
@@ -30,4 +30,4 @@ test:
 about:
   home: https://github.com/TuftsRT/conda-packages
   summary: Conda-enabled Git Bash prompt with Start Menu shortcut
-  license: GPL-2.0-only
+  license: GPL-2.0
