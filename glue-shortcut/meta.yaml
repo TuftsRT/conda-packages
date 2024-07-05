@@ -12,7 +12,7 @@ build:
 requirements:
   run:
     - menuinst >=1.4.18
-    - glue-core
+    - glueviz
 
 test:
   commands:
