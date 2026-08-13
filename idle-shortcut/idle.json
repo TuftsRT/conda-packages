@@ -1,13 +1,25 @@
-
 {
-    "menu_name": "${DISTRIBUTION_NAME}",
-    "menu_items":
-    [
-        {
-            "name": "IDLE",
-            "pywscript": "${PYTHON_SCRIPTS}/idle-script.py",
-            "workdir": "${USERPROFILE}",
-            "icon": "${MENU_DIR}/idle.ico"
-        }
-    ]
+  "$schema": "https://schemas.conda.org/menuinst/menuinst-1-1-3.schema.json",
+  "menu_name": "{{ DISTRIBUTION_NAME }}",
+  "menu_items": [
+    {
+      "name": {
+        "target_environment_is_base": "IDLE",
+        "target_environment_is_not_base": "IDLE ({{ ENV_NAME }})"
+      },
+      "description": "Python's Integrated Development and Learning Environment",
+      "command": ["{{ PYTHONW }}", "-m", "idlelib"],
+      "icon": "{{ MENU_DIR }}/idle.ico",
+      "activate": true,
+      "terminal": false,
+      "platforms": {
+        "win": {
+          "desktop": false,
+          "app_user_model_id": "{{ DISTRIBUTION_NAME }}.Python.IDLE.{{ ENV_NAME }}"
+        },
+        "osx": null,
+        "linux": null
+      }
+    }
+  ]
 }

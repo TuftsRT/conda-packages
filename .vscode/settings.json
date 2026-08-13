@@ -1,3 +1,10 @@
 {
-  "cSpell.words": ["menuinst", "msvc", "nullglob", "repodata"]
+  "cSpell.words": [
+    "idlelib",
+    "menuinst",
+    "msvc",
+    "nullglob",
+    "PYTHONW",
+    "repodata"
+  ]
 }
