@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["argjson", "msvc", "nullglob", "repodata"]
+  "cSpell.words": [
+    "argjson",
+    "condabin",
+    "menuinst",
+    "msvc",
+    "nullglob",
+    "repodata",
+    "WINDIR"
+  ]
 }
