@@ -1,0 +1,26 @@
+context:
+  version: "2.0"
+
+package:
+  name: powershell-shortcut
+  version: ${{ version }}
+
+build:
+  number: 0
+  skip:
+    - not win
+
+requirements:
+  run:
+    - menuinst >=2.5.0
+
+tests:
+  - script:
+      - if not exist %PREFIX%\Menu\powershell-shortcut.json exit 1
+      - if not exist %PREFIX%\Menu\powershell-shortcut.ico exit 1
+
+about:
+  homepage: https://github.com/TuftsRT/conda-packages
+  summary: Shortcut to launch Windows PowerShell with conda activated.
+  license: BSD-3-Clause
+  license_file: LICENSE
