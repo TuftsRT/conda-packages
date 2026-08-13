@@ -2,9 +2,11 @@
   "cSpell.words": [
     "argjson",
     "condabin",
+    "idlelib",
     "menuinst",
     "msvc",
     "nullglob",
+    "PYTHONW",
     "repodata",
     "WINDIR"
   ]
