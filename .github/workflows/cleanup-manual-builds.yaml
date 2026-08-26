@@ -1,0 +1,65 @@
+name: Cleanup Manual Builds
+
+on:
+  delete:
+  workflow_dispatch:
+
+concurrency:
+  group: >-
+    cleanup-manual-builds-${{ github.event_name == 'delete' &&
+    github.event.ref ||
+    github.ref_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      label: ${{ steps.compute-label.outputs.label }}
+      matrix: ${{ steps.list-recipes.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - id: list-recipes
+        run: .github/scripts/list-recipes.sh
+        shell: bash
+      - id: compute-label
+        name: Compute label
+        shell: bash
+        run: |
+          source .github/scripts/_branch_slug.sh
+          echo "label=gh-$(branch_slug "$BRANCH")" >> "$GITHUB_OUTPUT"
+        env:
+          BRANCH: >-
+            ${{ github.event_name == 'delete' &&
+            github.event.ref ||
+            github.ref_name }}
+
+  cleanup:
+    needs: setup
+    if: needs.setup.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe: ${{ fromJSON(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Clean up ${{ matrix.recipe }}
+        run: .github/scripts/cleanup-preview-label.sh
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          LABEL: ${{ needs.setup.outputs.label }}
+          PACKAGE: ${{ matrix.recipe }}
