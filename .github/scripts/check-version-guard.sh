@@ -8,16 +8,10 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(dirname "$0")/_anaconda_query.sh"
 
-repodata_file="$(find output -name repodata.json | head -1)"
-if [ -z "$repodata_file" ]; then
-  exit_failure "$PACKAGE: repodata file not found"
-fi
-
-local_metadata="$(extract_local_metadata "$repodata_file" "$PACKAGE")"
+local_metadata="$(load_local_metadata "$PACKAGE")"
 local_version="$(jq -r '.version' <<< "$local_metadata")"
 local_build="$(jq -r '.build_number' <<< "$local_metadata")"
 local_build_string="$(jq -r '.build' <<< "$local_metadata")"
-
 
 version_re='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
 if ! [[ "$local_version" =~ $version_re ]]; then

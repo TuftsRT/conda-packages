@@ -131,3 +131,15 @@ assert_sequential_version() {
     exit_failure "$package: $version is older than $current_highest on main"
   fi
 }
+
+load_local_metadata() {
+  local package="$1"
+  local repodata_file
+
+  repodata_file="$(find output -name repodata.json | head -1)"
+  if [ -z "$repodata_file" ]; then
+    exit_failure "$package: repodata file not found"
+  fi
+
+  extract_local_metadata "$repodata_file" "$package"
+}
