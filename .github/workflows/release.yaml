@@ -35,3 +35,13 @@ jobs:
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
           PACKAGE: ${{ inputs.package }}
           VERSION: ${{ inputs.version }}
+      - name: Summarize ${{ inputs.package }}
+        run: |
+          source .github/scripts/_print_utils.sh
+          metadata="$(build_metadata "$OWNER" main "$PACKAGE" "$VERSION")"
+          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+        env:
+          OWNER: ${{ vars.ANACONDA_OWNER }}
+          PACKAGE: ${{ inputs.package }}
+          VERSION: ${{ inputs.version }}
