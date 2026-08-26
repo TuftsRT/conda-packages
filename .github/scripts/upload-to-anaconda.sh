@@ -16,7 +16,7 @@ if [ "${#packages[@]}" -eq 0 ]; then
 fi
 
 case "$ANACONDA_CHANNEL" in
-  gh-*) export ANACONDA_FORCE=1 ;;
+  gh-*) export ANACONDA_FORCE=true ;;
 esac
 
 rattler-build upload anaconda "${packages[@]}"
