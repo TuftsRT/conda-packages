@@ -93,10 +93,10 @@ jobs:
         run: |
           source .github/scripts/_anaconda_query.sh
           source .github/scripts/_print_utils.sh
-          metadata="$(load_local_metadata "$PACKAGE" |
-            jq --arg owner "$ANACONDA_OWNER" --arg channel "$CHANNEL" \
-              '. + {owner: $owner, channel: $channel}' |
-            tee "$PACKAGE.json")"
+          local_metadata="$(load_local_metadata "$PACKAGE")"
+          metadata="$(augment_metadata \
+            "$local_metadata" "$ANACONDA_OWNER" "$CHANNEL")"
+          printf '%s\n' "$metadata" > "$PACKAGE.json"
           code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
         shell: bash
         env:
