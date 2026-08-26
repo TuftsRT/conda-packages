@@ -89,6 +89,20 @@ jobs:
           ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
           ANACONDA_CHANNEL: pr-${{ github.event.pull_request.number }}
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+      - name: Record and summarize ${{ matrix.recipe }}
+        run: |
+          source .github/scripts/_anaconda_query.sh
+          source .github/scripts/_print_utils.sh
+          metadata="$(load_local_metadata "$PACKAGE" |
+            jq --arg owner "$ANACONDA_OWNER" --arg channel "$CHANNEL" \
+              '. + {owner: $owner, channel: $channel}' |
+            tee "$PACKAGE.json")"
+          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+        env:
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          CHANNEL: pr-${{ github.event.pull_request.number }}
+          PACKAGE: ${{ matrix.recipe }}
 
   ci-success:
     if: always()
