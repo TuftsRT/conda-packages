@@ -1,0 +1,34 @@
+name: Detect Changed Recipes
+
+on:
+  workflow_call:
+    inputs:
+      base-sha:
+        required: true
+        type: string
+      head-sha:
+        required: true
+        type: string
+    outputs:
+      has-changes:
+        value: ${{ jobs.detect.outputs.has-changes }}
+      matrix:
+        value: ${{ jobs.detect.outputs.matrix }}
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - id: detect
+        run: .github/scripts/detect-changed-recipes.sh
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ inputs.base-sha }}
+          PR_HEAD_SHA: ${{ inputs.head-sha }}
