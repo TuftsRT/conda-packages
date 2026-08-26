@@ -1,0 +1,104 @@
+name: Publish Pull Request Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - edited
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  enforce-internal-head:
+    if: |
+      github.event.action == 'edited' ||
+      github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Enforce internal head branch
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        shell: bash
+        run: |
+          echo "::error::PRs must originate from an internal branch" >&2
+          exit 1
+
+  detect:
+    uses: ./.github/workflows/_detect_changed_recipes.yaml
+    with:
+      base-sha: ${{ github.event.pull_request.base.sha }}
+      head-sha: ${{ github.event.pull_request.head.sha }}
+
+  publish:
+    needs: detect
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.detect.outputs.has-changes == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Checkout ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: source
+      - id: compute-ci-tag
+        name: Compute CI tag
+        run: echo "ci-tag=pr${PR_NUMBER}_${HEAD_SHA:0:8}" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+      - name: Build ${{ matrix.recipe }}
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        with:
+          recipe-path: source/${{ matrix.recipe }}/recipe.yaml
+          upload-artifact: false
+          build-args: >
+            --build-platform win-64
+            --package-format conda
+        env:
+          CI_TAG: ${{ steps.compute-ci-tag.outputs.ci-tag }}
+      - name: Check version guard for ${{ matrix.recipe }}
+        run: .github/scripts/check-version-guard.sh
+        shell: bash
+        env:
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          PACKAGE: ${{ matrix.recipe }}
+      - name: Upload ${{ matrix.recipe }}
+        run: .github/scripts/upload-to-anaconda.sh
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+          ANACONDA_CHANNEL: pr-${{ github.event.pull_request.number }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+
+  ci-success:
+    if: always()
+    needs:
+      - detect
+      - enforce-internal-head
+      - publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ensure success
+        if: contains(needs.*.result, 'failure')
+        run: exit 1
