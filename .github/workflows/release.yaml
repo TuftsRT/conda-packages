@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Recipe directory name to release.
+        required: true
+      version:
+        description: Version to promote from dev to main.
+        required: true
+
+concurrency:
+  group: release-${{ inputs.package }}
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: release
+      url: https://anaconda.org/${{ vars.ANACONDA_OWNER }}/${{ inputs.package }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Promote ${{ inputs.package }} to main
+        run: .github/scripts/promote-to-main.sh
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          PACKAGE: ${{ inputs.package }}
+          VERSION: ${{ inputs.version }}
