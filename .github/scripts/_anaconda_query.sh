@@ -134,11 +134,10 @@ assert_sequential_version() {
 
 load_local_metadata() {
   local package="$1"
-  local repodata_file
+  local repodata_file="output/win-64/repodata.json"
 
-  repodata_file="$(find output -name repodata.json | head -1)"
-  if [ -z "$repodata_file" ]; then
-    exit_failure "$package: repodata file not found"
+  if [ ! -f "$repodata_file" ]; then
+    exit_failure "$package: $repodata_file not found"
   fi
 
   extract_local_metadata "$repodata_file" "$package"
