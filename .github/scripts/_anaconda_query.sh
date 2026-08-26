@@ -1,7 +1,7 @@
 # shellcheck disable=SC2148
 
 # shellcheck disable=SC1091
-source "$(dirname "$0")/_exit_failure.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/_exit_failure.sh"
 
 extract_local_metadata() {
   local repodata_file="$1"

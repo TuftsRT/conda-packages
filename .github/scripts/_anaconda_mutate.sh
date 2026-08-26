@@ -1,7 +1,7 @@
 # shellcheck disable=SC2148
 
 # shellcheck disable=SC1091
-source "$(dirname "$0")/_exit_failure.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/_exit_failure.sh"
 
 make_payload() {
   jq -n --arg package "$1" --arg version "$2" --arg basename "$3" \
