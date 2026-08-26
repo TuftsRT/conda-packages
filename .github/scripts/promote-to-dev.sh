@@ -4,6 +4,7 @@ set -euo pipefail
 
 : "${ANACONDA_API_KEY:?}"
 : "${ANACONDA_OWNER:?}"
+: "${GITHUB_OUTPUT:?}"
 : "${PACKAGE:?}"
 : "${PR_LABEL:?}"
 
@@ -19,6 +20,8 @@ pr_file="$(require_labeled_file "$files" "$PR_LABEL" "$PACKAGE")"
 pr_version="$(jq -r '.version' <<< "$pr_file")"
 pr_basename="$(jq -r '.basename' <<< "$pr_file")"
 pr_build="$(jq -r '.attrs.build' <<< "$pr_file")"
+
+echo "version=$pr_version" >> "$GITHUB_OUTPUT"
 
 assert_build_advances "$files" "$PACKAGE" "$pr_version" "$pr_build"
 

@@ -38,7 +38,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
-      - name: Promote ${{ matrix.recipe }} to dev
+      - id: promote-to-dev
+        name: Promote ${{ matrix.recipe }} to dev
         run: .github/scripts/promote-to-dev.sh
         shell: bash
         env:
@@ -46,6 +47,17 @@ jobs:
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
           PACKAGE: ${{ matrix.recipe }}
           PR_LABEL: pr-${{ github.event.pull_request.number }}
+      - name: Record and summarize ${{ matrix.recipe }}
+        run: |
+          source .github/scripts/_print_utils.sh
+          metadata="$(build_metadata "$OWNER" dev "$PACKAGE" "$VERSION")"
+          printf '%s\n' "$metadata" > "$PACKAGE.json"
+          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+        env:
+          OWNER: ${{ vars.ANACONDA_OWNER }}
+          PACKAGE: ${{ matrix.recipe }}
+          VERSION: ${{ steps.promote-to-dev.outputs.version }}
 
   cleanup-preview:
     needs:
