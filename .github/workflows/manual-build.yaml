@@ -1,0 +1,63 @@
+name: Manual Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      recipe:
+        description: Recipe directory name to build.
+        required: true
+
+concurrency:
+  group: manual-build-${{ github.ref_name }}-${{ inputs.recipe }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Reject manual builds from main
+        if: github.ref_name == 'main'
+        shell: bash
+        run: |
+          echo "::error::manual builds cannot be run from main" >&2
+          exit 1
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Checkout ${{ github.ref_name }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          path: source
+      - id: compute-label
+        name: Compute label and CI tag
+        shell: bash
+        run: |
+          source .github/scripts/_branch_slug.sh
+          slug="$(branch_slug "$BRANCH")"
+          echo "label=gh-${slug}" >> "$GITHUB_OUTPUT"
+          echo "ci-tag=gh_${slug//-/_}" >> "$GITHUB_OUTPUT"
+        env:
+          BRANCH: ${{ github.ref_name }}
+      - name: Build ${{ inputs.recipe }}
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        with:
+          recipe-path: source/${{ inputs.recipe }}/recipe.yaml
+          upload-artifact: false
+          build-args: >
+            --build-platform win-64
+            --package-format conda
+        env:
+          CI_TAG: ${{ steps.compute-label.outputs.ci-tag }}
+      - name: Upload ${{ inputs.recipe }}
+        run: .github/scripts/upload-to-anaconda.sh
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+          ANACONDA_CHANNEL: ${{ steps.compute-label.outputs.label }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
