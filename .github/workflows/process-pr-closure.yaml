@@ -1,0 +1,76 @@
+name: Process Pull Request Closure
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}-closed
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    uses: ./.github/workflows/_detect_changed_recipes.yaml
+    with:
+      base-sha: ${{ github.event.pull_request.base.sha }}
+      head-sha: ${{ github.event.pull_request.head.sha }}
+
+  promote-to-dev:
+    needs: detect
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.merged == true &&
+      needs.detect.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - name: Promote ${{ matrix.recipe }} to dev
+        run: .github/scripts/promote-to-dev.sh
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          PACKAGE: ${{ matrix.recipe }}
+          PR_LABEL: pr-${{ github.event.pull_request.number }}
+
+  cleanup-preview:
+    needs:
+      - detect
+      - promote-to-dev
+    if: |
+      always() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.detect.outputs.has-changes == 'true' &&
+      needs.promote-to-dev.result != 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Clean up preview builds for ${{ matrix.recipe }}
+        run: .github/scripts/cleanup-preview-label.sh
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          LABEL: pr-${{ github.event.pull_request.number }}
+          PACKAGE: ${{ matrix.recipe }}
