@@ -10,7 +10,7 @@ filter_recipe_dirs() {
   while read -r dir; do
     [ -n "$dir" ] &&
       git cat-file -e "$PR_HEAD_SHA:$dir/recipe.yaml" 2>/dev/null &&
-      echo "$dir"
+      echo "$dir" || true
   done
 }
 
