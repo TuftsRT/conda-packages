@@ -1,12 +1,5 @@
 # shellcheck disable=SC2148
 
-augment_metadata() {
-  local metadata="$1" owner="$2" channel="$3"
-
-  jq --arg owner "$owner" --arg channel "$channel" \
-    '. + {owner: $owner, channel: $channel}' <<< "$metadata"
-}
-
 build_metadata() {
   local owner="$1" channel="$2" name="$3" version="$4"
 
@@ -31,4 +24,12 @@ match_spec() {
   version="$(jq -r '.version' <<< "$metadata")"
 
   printf '%s/label/%s::%s=%s' "$owner" "$channel" "$name" "$version"
+}
+
+normalize_metadata() {
+  local metadata="$1" owner="$2" channel="$3"
+
+  jq --arg owner "$owner" --arg channel "$channel" \
+    '{owner: $owner, channel: $channel,
+      name: .name, version: .version}' <<< "$metadata"
 }

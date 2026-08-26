@@ -94,7 +94,7 @@ jobs:
           source .github/scripts/_anaconda_query.sh
           source .github/scripts/_print_utils.sh
           local_metadata="$(load_local_metadata "$PACKAGE")"
-          metadata="$(augment_metadata \
+          metadata="$(normalize_metadata \
             "$local_metadata" "$ANACONDA_OWNER" "$CHANNEL")"
           printf '%s\n' "$metadata" > "$PACKAGE.json"
           code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
