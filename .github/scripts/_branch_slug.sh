@@ -10,6 +10,6 @@ branch_slug() {
     tr -s '-' |
     sed 's/^-\|-$//'
   )"
-  hash="$(printf '%s' "$branch" | sha256sum | cut -c1-8)"
+  hash="$(printf '%s' "$branch" | sha256sum | cut -c1-4)"
   printf '%s-%s' "$sanitized" "$hash"
 }
