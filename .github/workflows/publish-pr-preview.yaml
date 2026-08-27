@@ -68,7 +68,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/rattler-build
-          key: rattler-build-${{ vars.RATTLER_BUILD_VERSION }}
+          key: rattler-build-${{ runner.os }}-${{ vars.RATTLER_BUILD_VERSION }}
       - name: Download rattler-build executable
         if: steps.cache-rattler-build.outputs.cache-hit != 'true'
         run: .github/scripts/get-rattler-build.sh
