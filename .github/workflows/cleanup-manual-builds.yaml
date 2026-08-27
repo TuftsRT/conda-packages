@@ -22,14 +22,16 @@ jobs:
     timeout-minutes: 5
     outputs:
       label: ${{ steps.compute-label.outputs.label }}
-      matrix: ${{ steps.list-recipes.outputs.matrix }}
+      matrix: ${{ steps.list-packages.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
-      - id: list-recipes
-        run: .github/scripts/list-recipes.sh
+      - id: list-packages
+        run: .github/scripts/list-anaconda-packages.sh
         shell: bash
+        env:
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
       - id: compute-label
         name: Compute label
         shell: bash
@@ -50,16 +52,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        recipe: ${{ fromJSON(needs.setup.outputs.matrix) }}
+        package: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
-      - name: Clean up ${{ matrix.recipe }}
+      - name: Clean up ${{ matrix.package }}
         run: .github/scripts/cleanup-preview-label.sh
         shell: bash
         env:
           ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
           LABEL: ${{ needs.setup.outputs.label }}
-          PACKAGE: ${{ matrix.recipe }}
+          PACKAGE: ${{ matrix.package }}
