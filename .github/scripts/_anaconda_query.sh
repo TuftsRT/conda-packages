@@ -53,14 +53,11 @@ find_highest_build() {
     <<< "$files"
 }
 
-find_orphaned_files() {
-  local files="$1"
-  local label="$2"
-
-  jq -r --arg label "$label" \
-    '.[] | select((.labels // []) == [$label]) |
+find_unlabeled_files() {
+  jq -r \
+    '.[] | select((.labels // []) == []) |
     [.version, .attrs.subdir, (.basename | split("/") | last)] | @tsv' \
-    <<< "$files"
+    <<< "$1"
 }
 
 require_labeled_file() {
