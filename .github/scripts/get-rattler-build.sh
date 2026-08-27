@@ -24,7 +24,7 @@ for ((attempt = 1; attempt <= attempts; attempt++)); do
   curl "${curl_args[@]}" "$url" -o "$exe"
 
   expected="$(curl "${curl_args[@]}" "$url.sha256" | cut -d' ' -f1)"
-  actual="$(sha256sum "$exe" | cut -d' ' -f1)"
+  actual="$(sha256sum "$exe" | cut -d' ' -f1 | sed 's/^\\//')"
 
   if [ "$actual" = "$expected" ]; then
     chmod +x "$exe"
