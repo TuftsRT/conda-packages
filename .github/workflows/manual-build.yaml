@@ -44,16 +44,30 @@ jobs:
           echo "ci-tag=gh_${slug//-/_}" >> "$GITHUB_OUTPUT"
         env:
           BRANCH: ${{ github.ref_name }}
-      - name: Build ${{ inputs.recipe }}
-        uses: prefix-dev/rattler-build-action@v0.2.39
+      - id: cache-rattler-build
+        name: Cache rattler-build executable
+        uses: actions/cache@v6
         with:
-          recipe-path: source/${{ inputs.recipe }}/recipe.yaml
-          upload-artifact: false
-          build-args: >
-            --build-platform win-64
-            --package-format conda
+          path: ${{ runner.temp }}/rattler-build
+          key: rattler-build-${{ vars.RATTLER_BUILD_VERSION }}
+      - name: Download rattler-build executable
+        if: steps.cache-rattler-build.outputs.cache-hit != 'true'
+        run: .github/scripts/get-rattler-build.sh
+        shell: bash
+        env:
+          RATTLER_BUILD_DIR: ${{ runner.temp }}/rattler-build
+          RATTLER_BUILD_VERSION: ${{ vars.RATTLER_BUILD_VERSION }}
+      - name: Add rattler-build to PATH
+        run: echo "$RATTLER_BUILD_DIR" >> "$GITHUB_PATH"
+        shell: bash
+        env:
+          RATTLER_BUILD_DIR: ${{ runner.temp }}/rattler-build
+      - name: Build ${{ inputs.recipe }}
+        run: .github/scripts/run-rattler-build.sh
+        shell: bash
         env:
           CI_TAG: ${{ steps.compute-label.outputs.ci-tag }}
+          RECIPE_PATH: "source/${{ inputs.recipe }}/recipe.yaml"
       - name: Upload ${{ inputs.recipe }}
         run: .github/scripts/upload-to-anaconda.sh
         shell: bash
