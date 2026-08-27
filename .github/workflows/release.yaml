@@ -36,12 +36,10 @@ jobs:
           PACKAGE: ${{ inputs.package }}
           VERSION: ${{ inputs.version }}
       - name: Summarize ${{ inputs.package }}
-        run: |
-          source .github/scripts/_print_utils.sh
-          metadata="$(build_metadata "$OWNER" main "$PACKAGE" "$VERSION")"
-          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        run: .github/scripts/summarize-promotion.sh
         shell: bash
         env:
-          OWNER: ${{ vars.ANACONDA_OWNER }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          CHANNEL: main
           PACKAGE: ${{ inputs.package }}
           VERSION: ${{ inputs.version }}

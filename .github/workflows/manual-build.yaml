@@ -76,13 +76,7 @@ jobs:
           ANACONDA_CHANNEL: ${{ steps.compute-label.outputs.label }}
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
       - name: Summarize ${{ inputs.recipe }}
-        run: |
-          source .github/scripts/_anaconda_query.sh
-          source .github/scripts/_print_utils.sh
-          local_metadata="$(load_local_metadata "$PACKAGE")"
-          metadata="$(normalize_metadata \
-            "$local_metadata" "$ANACONDA_OWNER" "$CHANNEL")"
-          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        run: .github/scripts/summarize-build.sh
         shell: bash
         env:
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}

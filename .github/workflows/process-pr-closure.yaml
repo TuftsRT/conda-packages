@@ -48,14 +48,12 @@ jobs:
           PACKAGE: ${{ matrix.recipe }}
           PR_LABEL: pr-${{ github.event.pull_request.number }}
       - name: Record and summarize ${{ matrix.recipe }}
-        run: |
-          source .github/scripts/_print_utils.sh
-          metadata="$(build_metadata "$OWNER" dev "$PACKAGE" "$VERSION")"
-          printf '%s\n' "$metadata" > "$PACKAGE.json"
-          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        run: .github/scripts/summarize-promotion.sh
         shell: bash
         env:
-          OWNER: ${{ vars.ANACONDA_OWNER }}
+          ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
+          CHANNEL: dev
+          METADATA_FILE: ${{ matrix.recipe }}.json
           PACKAGE: ${{ matrix.recipe }}
           VERSION: ${{ steps.promote-to-dev.outputs.version }}
 

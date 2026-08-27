@@ -104,18 +104,12 @@ jobs:
           ANACONDA_CHANNEL: pr-${{ github.event.pull_request.number }}
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
       - name: Record and summarize ${{ matrix.recipe }}
-        run: |
-          source .github/scripts/_anaconda_query.sh
-          source .github/scripts/_print_utils.sh
-          local_metadata="$(load_local_metadata "$PACKAGE")"
-          metadata="$(normalize_metadata \
-            "$local_metadata" "$ANACONDA_OWNER" "$CHANNEL")"
-          printf '%s\n' "$metadata" > "$PACKAGE.json"
-          code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+        run: .github/scripts/summarize-build.sh
         shell: bash
         env:
           ANACONDA_OWNER: ${{ vars.ANACONDA_OWNER }}
           CHANNEL: pr-${{ github.event.pull_request.number }}
+          METADATA_FILE: ${{ matrix.recipe }}.json
           PACKAGE: ${{ matrix.recipe }}
 
   ci-success:
