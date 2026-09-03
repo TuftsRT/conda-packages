@@ -58,7 +58,7 @@ jobs:
           path: source
       - id: compute-ci-tag
         name: Compute CI tag
-        run: echo "ci-tag=pr${PR_NUMBER}_${HEAD_SHA:0:8}" >> "$GITHUB_OUTPUT"
+        run: echo "ci-tag=pr${PR_NUMBER}_${HEAD_SHA:0:7}" >> "$GITHUB_OUTPUT"
         shell: bash
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
