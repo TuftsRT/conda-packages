@@ -19,9 +19,6 @@ permissions:
 
 jobs:
   enforce-internal-head:
-    if: |
-      github.event.action == 'edited' ||
-      github.event.action == 'opened'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
