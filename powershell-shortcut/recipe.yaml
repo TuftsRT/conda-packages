@@ -1,5 +1,5 @@
 context:
-  version: "2.0"
+  version: 2.0.0
   build_number: 0
   ci_tag: ${{ env.get("CI_TAG", default="") }}
 
