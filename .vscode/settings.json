@@ -3,9 +3,11 @@
     "argjson",
     "condabin",
     "idlelib",
+    "jupyterlab",
     "menuinst",
     "msvc",
     "nullglob",
+    "precommand",
     "PYTHONW",
     "repodata",
     "WINDIR"

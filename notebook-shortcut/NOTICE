@@ -1,0 +1,15 @@
+Third-Party Logo and Trademark Notice
+
+This package includes the Jupyter logo (notebook-shortcut.ico),
+copied unmodified from the Project Jupyter Design Repository:
+https://github.com/jupyter/design
+
+"Jupyter" and the Jupyter logos are trademarks of LF Charities, of which
+Project Jupyter is a part. The logo is used solely to identify the Jupyter
+application launched by this shortcut and does not imply endorsement,
+sponsorship, or affiliation by Project Jupyter or LF Charities.
+
+The BSD-3-Clause terms in the LICENSE file cover only the original materials
+in this package. They do not grant any rights to the Jupyter trademarks,
+which remain governed by the Project Jupyter Trademark Usage Policy:
+https://jupyter.org/governance/trademarks/

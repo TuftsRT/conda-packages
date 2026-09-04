@@ -1,0 +1,32 @@
+context:
+  version: "1.0"
+  build_number: 0
+  ci_tag: ${{ env.get("CI_TAG", default="") }}
+
+package:
+  name: notebook-shortcut
+  version: ${{ version }}
+
+build:
+  number: ${{ build_number }}
+  skip:
+    - not win
+  string: >-
+    ${{ hash }}_${{ build_number }}${{ '_' ~ ci_tag if ci_tag else '' }}
+
+requirements:
+  run:
+    - menuinst >=2.5.0
+    - notebook
+
+tests:
+  - script:
+      - if not exist %PREFIX%\Menu\notebook-shortcut.json exit 1
+      - if not exist %PREFIX%\Menu\notebook-shortcut.ico exit 1
+
+about:
+  homepage: https://github.com/TuftsRT/conda-packages
+  summary: >-
+    Start Menu shortcut to launch Jupyter Notebook in the default browser.
+  license: BSD-3-Clause
+  license_file: LICENSE
