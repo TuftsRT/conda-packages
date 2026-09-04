@@ -13,9 +13,10 @@ local_version="$(jq -r '.version' <<< "$local_metadata")"
 local_build="$(jq -r '.build_number' <<< "$local_metadata")"
 local_build_string="$(jq -r '.build' <<< "$local_metadata")"
 
-version_re='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+version_re='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?$'
 if ! [[ "$local_version" =~ $version_re ]]; then
-  exit_failure "$PACKAGE: version $local_version must be MAJOR.MINOR.PATCH"
+  exit_failure \
+    "$PACKAGE: version $local_version must be MAJOR.MINOR or MAJOR.MINOR.PATCH"
 fi
 
 if [ -n "${CI_TAG:-}" ] && [[ "$local_build_string" != *"$CI_TAG"* ]]; then
