@@ -28,8 +28,6 @@ jobs:
       needs.detect.outputs.has-changes == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -37,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: main
       - id: promote-to-dev
         name: Promote ${{ matrix.recipe }} to dev
         run: .github/scripts/promote-to-dev.sh

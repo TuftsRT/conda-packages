@@ -31,13 +31,15 @@ find_files_for_version() {
   local files="$1"
   local version="$2"
   local label="$3"
-  local max_build="${4:-null}" # only list builds strictly below this one
+  local max_build="${4:-null}" # only list builds equal to or below this one
+  local exclude="${5:-}"       # basename to exclude from results
 
   jq -r --arg version "$version" --arg label "$label" \
-    --argjson max_build "$max_build" \
+    --argjson max_build "$max_build" --arg exclude "$exclude" \
     '.[] | select(.version == $version and
       ((.labels // []) | index($label)) and
-      ($max_build == null or .attrs.build < $max_build)) |
+      ($max_build == null or .attrs.build_number <= $max_build) and
+      ($exclude == "" or .basename != $exclude)) |
       [.version, .attrs.subdir, (.basename | split("/") | last)] | @tsv' \
     <<< "$files"
 }
@@ -49,8 +51,8 @@ find_highest_build() {
 
   jq -c --arg version "$version" --arg label "$label" \
     '[.[] | select(.version == $version and
-      ((.labels // []) | index($label)))] | sort_by(.attrs.build) | last' \
-    <<< "$files"
+      ((.labels // []) | index($label)))] |
+      sort_by(.attrs.build_number) | last' <<< "$files"
 }
 
 find_unlabeled_files() {
@@ -96,36 +98,64 @@ version_lt() {
     [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n1)" = "$1" ]
 }
 
-assert_build_advances() {
+highest_build_across() {
+  local files="$1"
+  local version="$2"
+  shift 2
+
+  jq -r --arg version "$version" \
+    '[.[] | select(.version == $version and
+      ((.labels // []) | any(IN($ARGS.positional[])))) |
+      .attrs.build_number] | max // -1' --args "$@" <<< "$files"
+}
+
+highest_version_across() {
+  local files="$1"
+  shift
+
+  jq -r \
+    '[.[] | select((.labels // []) | any(IN($ARGS.positional[]))) |
+      .version] | unique[]' --args "$@" <<< "$files" | sort -V | tail -n1
+}
+
+assert_dev_promotable() {
   local files="$1"
   local package="$2"
   local version="$3"
   local build="$4"
-  local dev_build main_build highest_build
+  local highest_version highest_build
 
-  dev_build="$(find_highest_build "$files" "$version" dev |
-    jq -r '.attrs.build // -1')"
-  main_build="$(find_highest_build "$files" "$version" main |
-    jq -r '.attrs.build // -1')"
-  highest_build=$(( dev_build > main_build ? dev_build : main_build ))
+  highest_version="$(highest_version_across "$files" dev main)"
 
-  if [ "$build" -le "$highest_build" ]; then
-    exit_failure "$package: build $build must exceed $highest_build"
+  if [ -n "$highest_version" ] && version_lt "$version" "$highest_version"
+  then
+    exit_failure "$package: $version is older than $highest_version"
+  elif [ "$version" = "$highest_version" ]; then
+    highest_build="$(highest_build_across "$files" "$version" dev main)"
+    if [ "$build" -lt "$highest_build" ]; then
+      exit_failure \
+        "$package: build $build must not regress below $highest_build"
+    fi
   fi
 }
 
-assert_sequential_version() {
+assert_main_promotable() {
   local files="$1"
   local package="$2"
   local version="$3"
-  local current_highest
+  local build="$4"
+  local highest_version highest_build
 
-  current_highest="$(find_distinct_versions "$files" main |
-    sort -V | tail -n1)"
-  if [ -n "$current_highest" ] && [ "$version" != "$current_highest" ] &&
-    version_lt "$version" "$current_highest"
+  highest_version="$(highest_version_across "$files" main)"
+
+  if [ -n "$highest_version" ] && version_lt "$version" "$highest_version"
   then
-    exit_failure "$package: $version is older than $current_highest on main"
+    exit_failure "$package: $version is older than $highest_version"
+  elif [ "$version" = "$highest_version" ]; then
+    highest_build="$(highest_build_across "$files" "$version" main)"
+    if [ "$build" -le "$highest_build" ]; then
+      exit_failure "$package: build $build must exceed $highest_build"
+    fi
   fi
 }
 

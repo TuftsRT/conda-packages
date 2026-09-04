@@ -25,7 +25,5 @@ fi
 
 remote_metadata="$(require_package_files "$ANACONDA_OWNER" "$PACKAGE")"
 
-assert_build_advances \
+assert_dev_promotable \
   "$remote_metadata" "$PACKAGE" "$local_version" "$local_build"
-
-assert_sequential_version "$remote_metadata" "$PACKAGE" "$local_version"
