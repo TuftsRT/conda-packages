@@ -22,9 +22,6 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: write
-    environment:
-      name: release
-      url: https://anaconda.org/${{ vars.ANACONDA_OWNER }}/${{ inputs.package }}
     steps:
       - uses: actions/checkout@v7
         with:
