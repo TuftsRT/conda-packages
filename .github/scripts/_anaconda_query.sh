@@ -6,16 +6,15 @@ source "$(dirname "${BASH_SOURCE[0]}")/_exit_failure.sh"
 extract_local_metadata() {
   local repodata_file="$1"
   local context="$2"
-  local package_entries entry_count
+  local entry_count
 
-  package_entries="$(jq -c '."packages.conda" | to_entries' "$repodata_file")"
-  entry_count="$(jq 'length' <<< "$package_entries")"
+  entry_count="$(jq '."packages.conda" | length' "$repodata_file")"
   if [ "$entry_count" -ne 1 ]; then
     exit_failure \
       "$context: expected exactly one build in repodata but found $entry_count"
   fi
 
-  jq -c '.[0].value' <<< "$package_entries"
+  jq -c 'first(."packages.conda"[])' "$repodata_file"
 }
 
 find_distinct_versions() {
@@ -23,8 +22,8 @@ find_distinct_versions() {
   local label="$2"
 
   jq -r --arg label "$label" \
-    '[.[] | select((.labels // []) | index($label)) | .version] |
-    unique[]' <<< "$files"
+    '[.[] | select((.labels // []) | index($label)) | .version] | unique[]' \
+    <<< "$files"
 }
 
 find_files_for_version() {
@@ -58,8 +57,28 @@ find_highest_build() {
 find_unlabeled_files() {
   jq -r \
     '.[] | select((.labels // []) == []) |
-    [.version, .attrs.subdir, (.basename | split("/") | last)] | @tsv' \
+      [.version, .attrs.subdir, (.basename | split("/") | last)] | @tsv' \
     <<< "$1"
+}
+
+highest_build_across() {
+  local files="$1"
+  local version="$2"
+  shift 2
+
+  jq -r --arg version "$version" \
+    '[.[] | select(.version == $version and
+      ((.labels // []) | any(IN($ARGS.positional[])))) |
+      .attrs.build_number] | max // -1' --args "$@" <<< "$files"
+}
+
+highest_version_across() {
+  local files="$1"
+  shift
+
+  jq -r \
+    '[.[] | select((.labels // []) | any(IN($ARGS.positional[]))) |
+      .version] | unique[]' --args "$@" <<< "$files" | sort -V | tail -n1
 }
 
 require_labeled_file() {
@@ -70,7 +89,7 @@ require_labeled_file() {
 
   file="$(jq -c --arg label "$label" \
     '[.[] | select((.labels // []) | index($label))] |
-    sort_by(.upload_time) | last' <<< "$files")"
+      sort_by(.upload_time) | last' <<< "$files")"
   if [ "$file" = "null" ]; then
     exit_failure "$context: no build with label $label found"
   fi
@@ -98,24 +117,15 @@ version_lt() {
     [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n1)" = "$1" ]
 }
 
-highest_build_across() {
-  local files="$1"
-  local version="$2"
-  shift 2
+load_local_metadata() {
+  local package="$1"
+  local repodata_file="output/win-64/repodata.json"
 
-  jq -r --arg version "$version" \
-    '[.[] | select(.version == $version and
-      ((.labels // []) | any(IN($ARGS.positional[])))) |
-      .attrs.build_number] | max // -1' --args "$@" <<< "$files"
-}
+  if [ ! -f "$repodata_file" ]; then
+    exit_failure "$package: $repodata_file not found"
+  fi
 
-highest_version_across() {
-  local files="$1"
-  shift
-
-  jq -r \
-    '[.[] | select((.labels // []) | any(IN($ARGS.positional[]))) |
-      .version] | unique[]' --args "$@" <<< "$files" | sort -V | tail -n1
+  extract_local_metadata "$repodata_file" "$package"
 }
 
 assert_dev_promotable() {
@@ -157,15 +167,4 @@ assert_main_promotable() {
       exit_failure "$package: build $build must exceed $highest_build"
     fi
   fi
-}
-
-load_local_metadata() {
-  local package="$1"
-  local repodata_file="output/win-64/repodata.json"
-
-  if [ ! -f "$repodata_file" ]; then
-    exit_failure "$package: $repodata_file not found"
-  fi
-
-  extract_local_metadata "$repodata_file" "$package"
 }
