@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schemas.conda.org/menuinst-1-1-3.schema.json",
+  "menu_name": "{{ DISTRIBUTION_NAME }}",
+  "menu_items": [
+    {
+      "name": {
+        "target_environment_is_base": "Jupyter Notebook",
+        "target_environment_is_not_base": "Jupyter Notebook ({{ ENV_NAME }})"
+      },
+      "description": "Launch Jupyter Notebook in your default web browser.",
+      "command": ["{{ PYTHONW }}", "-m", "notebook"],
+      "icon": "{{ MENU_DIR }}/notebook-shortcut.ico",
+      "activate": true,
+      "terminal": false,
+      "platforms": {
+        "win": {
+          "desktop": false,
+          "app_user_model_id": "{{ DISTRIBUTION_NAME }}.Jupyter.Notebook.{{ ENV_NAME }}"
+        },
+        "osx": null,
+        "linux": null
+      }
+    }
+  ]
+}

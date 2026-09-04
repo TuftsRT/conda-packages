@@ -3,6 +3,7 @@
     "argjson",
     "condabin",
     "idlelib",
+    "jupyterlab",
     "menuinst",
     "msvc",
     "nullglob",
