@@ -17,4 +17,8 @@ if [ -n "${METADATA_FILE:-}" ]; then
   printf '%s\n' "$metadata" > "$METADATA_FILE"
 fi
 
-code_block "$(match_spec "$metadata")" >> "$GITHUB_STEP_SUMMARY"
+{
+  code_block "$(match_spec "$metadata")"
+  echo
+  printf '<%s>\n' "$(package_url "$metadata")"
+} >> "$GITHUB_STEP_SUMMARY"

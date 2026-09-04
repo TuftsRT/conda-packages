@@ -25,3 +25,7 @@ normalize_metadata() {
     '{owner: $owner, channel: $channel,
       name: .name, version: .version}' <<< "$metadata"
 }
+
+package_url() {
+  jq -j '"https://anaconda.org/" + .owner + "/" + .name' <<< "$1"
+}
