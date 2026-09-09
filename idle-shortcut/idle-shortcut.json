@@ -9,7 +9,7 @@
       },
       "description": "Python Integrated Development and Learning Environment",
       "command": ["{{ PYTHONW }}", "-m", "idlelib"],
-      "icon": "{{ MENU_DIR }}/idle.ico",
+      "icon": "{{ MENU_DIR }}/idle-shortcut.ico",
       "activate": true,
       "terminal": false,
       "platforms": {
